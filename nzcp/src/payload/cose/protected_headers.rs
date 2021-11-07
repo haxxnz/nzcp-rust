@@ -5,13 +5,15 @@ use serde::{
     Deserialize, Deserializer,
 };
 
+use super::signature::SignatureAlgorithm;
+
 const KID_KEY: u8 = 4;
 const ALG_KEY: u8 = 1;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ProtectedHeaders<'a> {
     pub kid: &'a str,
-    pub algorithm: i8,
+    pub algorithm: SignatureAlgorithm,
 }
 
 struct ProtectedHeadersVisitor;
@@ -33,7 +35,7 @@ impl<'de> Visitor<'de> for ProtectedHeadersVisitor {
         while let Some(key) = map.next_key()? {
             match key {
                 KID_KEY => kid = Some(map.next_value()?),
-                ALG_KEY => algorithm = Some(map.next_value()?),
+                ALG_KEY => algorithm = Some(map.next_value::<i8>()?.try_into().map_err(A::Error::custom)?),
                 _ => return Err(A::Error::unknown_field(&format!("{}", key), &["4 (kid)", "1 (alg)"])),
             }
         }
