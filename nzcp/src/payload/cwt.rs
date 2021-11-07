@@ -85,7 +85,11 @@ where
                     verifiable_credential,
                 })
             }
-            _ => todo!(),
+            (None, ..) => Err(A::Error::missing_field("7 (cwt)")),
+            (_, None, ..) => Err(A::Error::missing_field("1 (iss)")),
+            (_, _, None, ..) => Err(A::Error::missing_field("5 (nbf)")),
+            (_, _, _, None, ..) => Err(A::Error::missing_field("4 (exp)")),
+            (.., None) => Err(A::Error::missing_field("vc")),
         }
     }
 }
