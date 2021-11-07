@@ -19,7 +19,7 @@ struct PublicCovidPass<'a> {
 
     /// Family name(s) of the subject of the pass.
     #[serde(rename = "familyName")]
-    family_name: &'a str,
+    family_name: Option<&'a str>,
 
     #[serde(rename = "dob", deserialize_with = "deserialize_iso_8601_date")]
     date_of_birth: NaiveDate,
@@ -55,7 +55,7 @@ mod tests {
             payload,
             PublicCovidPass {
                 given_name: "John Andrew",
-                family_name: "Doe",
+                family_name: Some("Doe"),
                 date_of_birth: NaiveDate::from_ymd(1979, 04, 14),
             }
         )
