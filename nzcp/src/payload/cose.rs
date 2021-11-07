@@ -24,8 +24,16 @@ pub struct CoseStructure<'a, T> {
 
 impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
-    pub fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
-        self.verify_signature()?;
+    pub async fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
+        // TODO: caching
+        let public_key = self
+            .cwt_payload
+            .issuer
+            .resolve_public_key(self.protected_headers.kid)
+            .await
+            .unwrap();
+        self.verify_signature(&public_key)?;
+
         Ok(self.cwt_payload)
     }
 }
@@ -40,6 +48,8 @@ where
     {
         let tagged: Tagged<CoseStructureSections<'_, T>> = Deserialize::deserialize(deserializer)?;
         let CoseStructureSections {
+            protected_headers_raw,
+            cwt_payload_raw,
             protected_headers,
             cwt_payload,
             signature,
@@ -51,6 +61,8 @@ where
             signature: CoseSignature {
                 bytes: signature,
                 sign_structure: CoseSignStructure::try_from(tagged.tag).map_err(D::Error::custom)?,
+                protected_headers_raw,
+                cwt_payload_raw,
             },
         })
     }
@@ -60,6 +72,8 @@ where
 /// then when deserializing `CoseStructure` we merge these sections with the sign structure tag.
 #[derive(Debug)]
 struct CoseStructureSections<'a, T> {
+    protected_headers_raw: &'a [u8],
+    cwt_payload_raw: &'a [u8],
     protected_headers: ProtectedHeaders<'a>,
     cwt_payload: CwtPayload<'a, T>,
     signature: &'a [u8],
@@ -94,20 +108,23 @@ where
                 .ok_or_else(|| A::Error::custom(format!("missing COSE segment: {}", name)))
         };
 
-        let protected_headers =
-            serde_cbor::from_slice(bytes("protected headers", &mut seq)?).map_err(A::Error::custom)?;
+        let protected_headers_raw = bytes("protected headers", &mut seq)?;
+        let protected_headers = serde_cbor::from_slice(protected_headers_raw).map_err(A::Error::custom)?;
 
         // unprotected headers are empty in spec, just skip them
         let _: IgnoredAny = seq
             .next_element()?
             .ok_or_else(|| A::Error::custom("missing COSE segment: unprotected headers"))?;
 
-        let cwt_payload = serde_cbor::from_slice(bytes("CWT payload", &mut seq)?).map_err(A::Error::custom)?;
+        let cwt_payload_raw = bytes("CWT payload", &mut seq)?;
+        let cwt_payload = serde_cbor::from_slice(cwt_payload_raw).map_err(A::Error::custom)?;
         let signature = bytes("signature", &mut seq)?;
 
         Ok(CoseStructureSections {
             protected_headers,
+            protected_headers_raw,
             cwt_payload,
+            cwt_payload_raw,
             signature,
         })
     }

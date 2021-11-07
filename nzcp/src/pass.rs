@@ -12,7 +12,7 @@ pub trait Pass: DeserializeOwned {
     const CREDENTIAL_TYPE: &'static str;
 }
 
-pub fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
+pub async fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
     // extract the decoded data from the barcode string
     let barcode: QrBarcode = barcode_str.parse()?;
 
@@ -20,7 +20,7 @@ pub fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
     let cose: CoseStructure<'_, P> = serde_cbor::from_slice(&barcode.0)?;
 
     // verify the COST signature and get the inner CWT
-    let cwt = cose.verified_payload()?;
+    let cwt = cose.verified_payload().await?;
 
     // validate the CWT and get the inner pass
     let pass = cwt.validated_credential_subject()?;

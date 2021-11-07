@@ -105,7 +105,7 @@ impl<'a> DecentralizedIdentifier<'a> {
         }
     }
 
-    async fn resolve_public_key(&self, kid: &str) -> Result<PublicKey, DecentralizedIdentifierError> {
+    pub async fn resolve_public_key(&self, kid: &str) -> Result<PublicKey, DecentralizedIdentifierError> {
         let document = self.resolve_document().await?;
 
         let absolute_key = format!("{}#{}", self.did(), kid);
