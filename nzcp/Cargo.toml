@@ -9,6 +9,7 @@ chrono = "0.4.19"
 did-web = "0.1.1"
 p256 = {version = "0.9.0", features = ["ecdsa"]}
 serde = {version = "~1", features = ["derive"]}
+serde_bytes = "0.11.5"
 serde_cbor = {version = "0.11.2", features = ["tags"]}
 sha2 = "0.9.8"
 ssi = "0.3.0"

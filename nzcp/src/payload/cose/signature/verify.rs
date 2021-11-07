@@ -46,8 +46,13 @@ impl<'a, T> CoseStructure<'a, T> {
     }
 }
 
-#[derive(Serialize)]
-struct SignatureStructure<'a>(&'static str, &'a [u8], &'static [u8], &'a [u8]);
+#[derive(Serialize, Debug)]
+struct SignatureStructure<'a>(
+    &'static str,
+    #[serde(with = "serde_bytes")] &'a [u8],
+    #[serde(with = "serde_bytes")] &'static [u8],
+    #[serde(with = "serde_bytes")] &'a [u8],
+);
 
 impl<'a> CoseSignature<'a> {
     fn sig_structure(&self) -> SignatureStructure<'a> {
