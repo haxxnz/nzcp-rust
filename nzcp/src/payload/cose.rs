@@ -30,8 +30,7 @@ impl<'a, T> CoseStructure<'a, T> {
             .cwt_payload
             .issuer
             .resolve_public_key(self.protected_headers.kid)
-            .await
-            .unwrap();
+            .await?;
         self.verify_signature(&public_key)?;
 
         Ok(self.cwt_payload)

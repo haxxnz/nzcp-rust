@@ -38,7 +38,7 @@ impl<'de> Visitor<'de> for DecentralizedIdentifierVisitor {
     where
         E: de::Error,
     {
-        if did.starts_with(DID_WEB) {
+        if let Some(did) = did.strip_prefix(DID_WEB) {
             Ok(DecentralizedIdentifier::Web(did))
         }
         else {
@@ -85,14 +85,14 @@ pub enum DecentralizedIdentifierError {
 }
 
 impl<'a> DecentralizedIdentifier<'a> {
-    fn did(&self) -> &'a str {
+    fn did(&self) -> String {
         match self {
-            DecentralizedIdentifier::Web(did) => did,
+            DecentralizedIdentifier::Web(did) => format!("{}{}", DID_WEB, did),
         }
     }
 
     async fn resolve_document(&self) -> Result<Document, DecentralizedIdentifierError> {
-        let (metadata, document, _) = DIDWeb.resolve(self.did(), &ResolutionInputMetadata::default()).await;
+        let (metadata, document, _) = DIDWeb.resolve(&self.did(), &ResolutionInputMetadata::default()).await;
 
         if let Some(error) = metadata.error {
             Err(DecentralizedIdentifierError::ResolutionError(error))

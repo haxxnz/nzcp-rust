@@ -14,14 +14,14 @@ pub enum PublicCovidPassError {
 pub struct PublicCovidPass {
     /// Given name(s) of the subject of the pass.
     #[serde(rename = "givenName")]
-    given_name: String,
+    pub given_name: String,
 
     /// Family name(s) of the subject of the pass.
     #[serde(rename = "familyName")]
-    family_name: Option<String>,
+    pub family_name: Option<String>,
 
     #[serde(rename = "dob", deserialize_with = "deserialize_iso_8601_date")]
-    date_of_birth: NaiveDate,
+    pub date_of_birth: NaiveDate,
 }
 
 impl Pass for PublicCovidPass {

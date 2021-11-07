@@ -3,6 +3,10 @@ use thiserror::Error;
 
 use super::{CwtPayload, DecentralizedIdentifier};
 
+/// Spec examples use a different issuer to production.
+#[cfg(test)]
+const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier = DecentralizedIdentifier::Web("nzcp.covid19.health.nz");
+#[cfg(not(test))]
 const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier = DecentralizedIdentifier::Web("nzcp.identity.health.nz");
 
 #[derive(Debug, Error)]
