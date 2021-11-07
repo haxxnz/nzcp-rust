@@ -1,9 +1,8 @@
 use chrono::NaiveDate;
 use serde::{de::Error, Deserialize, Deserializer};
+use thiserror::Error;
 
 use super::Pass;
-
-use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum PublicCovidPassError {

@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use base32::Alphabet::RFC4648;
-
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -45,8 +44,9 @@ impl FromStr for QrBarcode {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::fmt::Write;
+
+    use super::*;
 
     #[test]
     fn deserialize_barcode() {

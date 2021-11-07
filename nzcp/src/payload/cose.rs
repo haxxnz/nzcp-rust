@@ -1,15 +1,15 @@
 use std::{fmt, marker::PhantomData};
 
-use self::{
-    protected_headers::ProtectedHeaders,
-    signature::{verify::CoseSignatureError, CoseSignStructure, CoseSignature},
-};
 use serde::{
     de::{self, Error, IgnoredAny, Visitor},
     Deserialize, Deserializer,
 };
 use serde_cbor::tags::Tagged;
 
+use self::{
+    protected_headers::ProtectedHeaders,
+    signature::{verify::CoseSignatureError, CoseSignStructure, CoseSignature},
+};
 use super::cwt::CwtPayload;
 
 mod protected_headers;
@@ -127,9 +127,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::payload::cose::signature::SignatureAlgorithm;
-
     use super::*;
+    use crate::payload::cose::signature::SignatureAlgorithm;
 
     #[test]
     fn deserialize_cose() {
