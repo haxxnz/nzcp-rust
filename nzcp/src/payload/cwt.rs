@@ -7,6 +7,10 @@ use serde::{
 };
 use uuid::Uuid;
 
+use self::verify::CwtVerificationError;
+
+pub mod verify;
+
 const CWT_TOKEN_CLAIM_KEY: i128 = 7;
 const ISSUER_CLAIM_KEY: i128 = 1;
 const NOT_BEFORE_CLAIM_KEY: i128 = 5;
@@ -17,14 +21,17 @@ const EXPECTED_KEYS: [&'static str; 5] = ["7 (cwt)", "1 (iss)", "5 (nbf)", "4 (e
 #[derive(Debug, PartialEq, Eq)]
 pub struct CwtPayload<'a, T> {
     cwt_token_id: Uuid,
-
     issuer: DecentralizedIdentifier<'a>,
-
     not_before: NaiveDateTime,
-
     expiry: NaiveDateTime,
-
     verifiable_credential: VerifiableCredential<'a, T>,
+}
+
+impl<'a, T> CwtPayload<'a, T> {
+    pub fn verified_credential_subject(self) -> Result<T, CwtVerificationError> {
+        self.verify()?;
+        Ok(self.verifiable_credential.credential_subject)
+    }
 }
 
 /// CWT payload contains integer keys, so we need to manually deserialize.

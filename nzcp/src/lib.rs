@@ -1,3 +1,5 @@
+pub use pass::{public_covid_pass::PublicCovidPass, verify_pass_barcode};
+
 pub mod error;
-pub mod pass;
-pub mod payload;
+mod pass;
+mod payload;

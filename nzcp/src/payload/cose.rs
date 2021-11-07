@@ -2,7 +2,7 @@ use std::{fmt, marker::PhantomData};
 
 use self::{
     protected_headers::ProtectedHeaders,
-    signature::{CoseSignStructure, CoseSignature},
+    signature::{verify::CoseSignatureError, CoseSignStructure, CoseSignature},
 };
 use serde::{
     de::{self, Error, IgnoredAny, Visitor},
@@ -13,7 +13,7 @@ use serde_cbor::tags::Tagged;
 use super::cwt::CwtPayload;
 
 mod protected_headers;
-mod signature;
+pub mod signature;
 
 #[derive(Debug)]
 pub struct CoseStructure<'a, T> {
@@ -22,9 +22,17 @@ pub struct CoseStructure<'a, T> {
     signature: CoseSignature<'a>,
 }
 
+impl<'a, T> CoseStructure<'a, T> {
+    /// Get the CWT payload iff the signature is valid.
+    pub fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
+        self.validate_signature()?;
+        Ok(self.cwt_payload)
+    }
+}
+
 impl<'de: 'a, 'a, T> Deserialize<'de> for CoseStructure<'a, T>
 where
-    T: Deserialize<'de> + std::fmt::Debug,
+    T: Deserialize<'de>,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

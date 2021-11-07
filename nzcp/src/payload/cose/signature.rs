@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+pub mod verify;
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct CoseSignature<'a> {
     pub bytes: &'a [u8],

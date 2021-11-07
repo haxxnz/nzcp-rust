@@ -12,20 +12,20 @@ pub enum PublicCovidPassError {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
-struct PublicCovidPass<'a> {
+pub struct PublicCovidPass {
     /// Given name(s) of the subject of the pass.
     #[serde(rename = "givenName")]
-    given_name: &'a str,
+    given_name: String,
 
     /// Family name(s) of the subject of the pass.
     #[serde(rename = "familyName")]
-    family_name: Option<&'a str>,
+    family_name: Option<String>,
 
     #[serde(rename = "dob", deserialize_with = "deserialize_iso_8601_date")]
     date_of_birth: NaiveDate,
 }
 
-impl<'a> Pass for PublicCovidPass<'a> {
+impl Pass for PublicCovidPass {
     const CREDENTIAL_TYPE: &'static str = "PublicCovidPass";
 }
 
@@ -54,8 +54,8 @@ mod tests {
         assert_eq!(
             payload,
             PublicCovidPass {
-                given_name: "John Andrew",
-                family_name: Some("Doe"),
+                given_name: String::from("John Andrew"),
+                family_name: Some(String::from("Doe")),
                 date_of_birth: NaiveDate::from_ymd(1979, 04, 14),
             }
         )
