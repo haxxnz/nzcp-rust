@@ -1,15 +1,16 @@
 use std::{fmt, marker::PhantomData};
 
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{
     de::{self, Error, Visitor},
     Deserialize, Deserializer,
 };
 use uuid::Uuid;
 
-use self::verify::CwtVerificationError;
+use self::validation::CwtValidationError;
+use crate::decentralised_identifier::DecentralizedIdentifier;
 
-pub mod verify;
+pub mod validation;
 
 const CWT_TOKEN_CLAIM_KEY: i128 = 7;
 const ISSUER_CLAIM_KEY: i128 = 1;
@@ -22,16 +23,20 @@ const EXPECTED_KEYS: [&'static str; 5] = ["7 (cwt)", "1 (iss)", "5 (nbf)", "4 (e
 pub struct CwtPayload<'a, T> {
     cwt_token_id: Uuid,
     issuer: DecentralizedIdentifier<'a>,
-    not_before: NaiveDateTime,
-    expiry: NaiveDateTime,
+    not_before: DateTime<Utc>,
+    expiry: DateTime<Utc>,
     verifiable_credential: VerifiableCredential<'a, T>,
 }
 
 impl<'a, T> CwtPayload<'a, T> {
-    pub fn verified_credential_subject(self) -> Result<T, CwtVerificationError> {
-        self.verify()?;
+    pub fn validated_credential_subject(self) -> Result<T, CwtValidationError> {
+        self.validate()?;
         Ok(self.verifiable_credential.credential_subject)
     }
+}
+
+fn utc_from_timestamp(epoch_seconds: i64) -> DateTime<Utc> {
+    DateTime::from_utc(NaiveDateTime::from_timestamp(epoch_seconds, 0), Utc)
 }
 
 /// CWT payload contains integer keys, so we need to manually deserialize.
@@ -62,12 +67,13 @@ where
             match key {
                 Integer(CWT_TOKEN_CLAIM_KEY) => cwt_token_id = Some(map.next_value()?),
                 Integer(ISSUER_CLAIM_KEY) => issuer = Some(map.next_value()?),
-                Integer(NOT_BEFORE_CLAIM_KEY) => not_before = Some(NaiveDateTime::from_timestamp(map.next_value()?, 0)),
-                Integer(EXPIRY_CLAIM_KEY) => expiry = Some(NaiveDateTime::from_timestamp(map.next_value()?, 0)),
+                Integer(NOT_BEFORE_CLAIM_KEY) => not_before = Some(utc_from_timestamp(map.next_value()?)),
+                Integer(EXPIRY_CLAIM_KEY) => expiry = Some(utc_from_timestamp(map.next_value()?)),
                 Text(text_key) => {
                     if text_key == VERIFIABLE_CREDENTIAL_KEY {
                         verifiable_credential = Some(map.next_value()?);
-                    } else {
+                    }
+                    else {
                         return Err(A::Error::unknown_field(&text_key, &EXPECTED_KEYS));
                     }
                 }
@@ -134,42 +140,6 @@ struct VerifiableCredential<'a, T> {
     credential_subject: T,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-enum DecentralizedIdentifier<'a> {
-    Web(&'a str),
-}
-
-struct DecentralizedIdentifierVisitor;
-
-impl<'de> Visitor<'de> for DecentralizedIdentifierVisitor {
-    type Value = DecentralizedIdentifier<'de>;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter
-            .write_str("a Decentralized Identifier who’s DID Method MUST correspond to web (starting with 'did:web:')")
-    }
-
-    fn visit_borrowed_str<E>(self, string: &'de str) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {
-        if let Some(identifier) = string.strip_prefix("did:web:") {
-            Ok(DecentralizedIdentifier::Web(identifier))
-        } else {
-            Err(E::custom("invalid DID"))
-        }
-    }
-}
-
-impl<'de: 'a, 'a> Deserialize<'de> for DecentralizedIdentifier<'a> {
-    fn deserialize<D>(deserializer: D) -> Result<DecentralizedIdentifier<'a>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_str(DecentralizedIdentifierVisitor)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -187,8 +157,8 @@ mod tests {
             CwtPayload {
                 cwt_token_id: Uuid::parse_str("urn:uuid:60a4f54d-4e30-4332-be33-ad78b1eafa4b").unwrap(),
                 issuer: DecentralizedIdentifier::Web("nzcp.covid19.health.nz"),
-                not_before: NaiveDateTime::from_timestamp(1635883530, 0),
-                expiry: NaiveDateTime::from_timestamp(1951416330, 0),
+                not_before: utc_from_timestamp(1635883530),
+                expiry: utc_from_timestamp(1951416330),
                 verifiable_credential: VerifiableCredential {
                     context: vec![
                         "https://www.w3.org/2018/credentials/v1",

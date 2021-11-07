@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 use crate::payload::{
-    barcode::QrBarcodeError, cose::signature::verify::CoseSignatureError, cwt::verify::CwtVerificationError,
+    barcode::QrBarcodeError, cose::signature::verify::CoseSignatureError, cwt::validation::CwtValidationError,
 };
 
 #[derive(Debug, Error)]
@@ -13,5 +13,5 @@ pub enum NzcpError {
     #[error("Invalid signature: {0:?}")]
     InvalidSignature(#[from] CoseSignatureError),
     #[error("Invalid CWT: {0:?}")]
-    InvalidCWT(#[from] CwtVerificationError),
+    InvalidCWT(#[from] CwtValidationError),
 }

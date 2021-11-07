@@ -6,7 +6,7 @@ use crate::payload::cose::CoseStructure;
 pub enum CoseSignatureError {}
 
 impl<'a, T> CoseStructure<'a, T> {
-    pub fn validate_signature(&self) -> Result<(), CoseSignatureError> {
+    pub fn verify_signature(&self) -> Result<(), CoseSignatureError> {
         todo!()
     }
 }

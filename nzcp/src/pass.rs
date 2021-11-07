@@ -22,8 +22,8 @@ pub fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
     // verify the COST signature and get the inner CWT
     let cwt = cose.verified_payload()?;
 
-    // verify the CWT and get the inner pass
-    let pass = cwt.verified_credential_subject()?;
+    // validate the CWT and get the inner pass
+    let pass = cwt.validated_credential_subject()?;
 
     Ok(pass)
 }

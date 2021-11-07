@@ -25,7 +25,7 @@ pub struct CoseStructure<'a, T> {
 impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
     pub fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
-        self.validate_signature()?;
+        self.verify_signature()?;
         Ok(self.cwt_payload)
     }
 }
