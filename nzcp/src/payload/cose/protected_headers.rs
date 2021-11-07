@@ -41,7 +41,7 @@ impl<'de> Visitor<'de> for ProtectedHeadersVisitor {
         match (kid, algorithm) {
             (Some(kid), Some(algorithm)) => Ok(ProtectedHeaders { kid, algorithm }),
             (_, None) => Err(A::Error::missing_field("1 (alg)")),
-            (None, _) => Err(A::Error::missing_field("4 (kid)")),
+            (None, _) => Err(A::Error::missing_field(" (kid)")),
         }
     }
 }
