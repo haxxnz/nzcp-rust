@@ -1,7 +1,10 @@
 use thiserror::Error;
 
-pub use crate::payload::{
-    barcode::QrBarcodeError, cose::signature::verify::CoseVerificationError, cwt::validation::CwtValidationError,
+pub use crate::{
+    decentralised_identifier::DecentralizedIdentifierError,
+    payload::{
+        barcode::QrBarcodeError, cose::signature::verify::CoseVerificationError, cwt::validation::CwtValidationError,
+    },
 };
 
 #[derive(Debug, Error)]

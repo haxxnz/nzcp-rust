@@ -1,5 +1,5 @@
 use nzcp::{
-    error::{CoseVerificationError, NzcpError},
+    error::{CoseVerificationError, DecentralizedIdentifierError, NzcpError},
     verify_pass_barcode_with_trusted_issuer, DecentralizedIdentifier, PublicCovidPass,
 };
 
@@ -16,6 +16,8 @@ async fn public_key_not_found() {
 
     assert_eq!(
         error,
-        NzcpError::InvalidSignature(CoseVerificationError::VerificationFailed)
+        NzcpError::InvalidSignature(CoseVerificationError::DecentralizedIdentifierResolution(
+            DecentralizedIdentifierError::MissingAssertionMethod(String::from("did:web:nzcp.covid19.health.nz#key-2"))
+        ))
     )
 }
