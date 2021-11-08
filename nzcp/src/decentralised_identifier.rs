@@ -96,7 +96,41 @@ impl<'a> DecentralizedIdentifier<'a> {
     }
 
     async fn resolve_document(&self) -> Result<Document, DecentralizedIdentifierError> {
-        let (metadata, document, _) = DIDWeb.resolve(&self.did(), &ResolutionInputMetadata::default()).await;
+        // TODO: horrifically disgusting temporary work around for https://github.com/vaxxnz/nzcp-rust/issues/1
+        let (metadata, doc_data, _) = DIDWeb
+            .resolve_representation(&self.did(), &ResolutionInputMetadata::default())
+            .await;
+        let doc_opt: Option<serde_json::Value> = if doc_data.is_empty() {
+            None
+        }
+        else {
+            match serde_json::from_slice(&doc_data) {
+                Ok(doc) => doc,
+                Err(err) => return Err(DecentralizedIdentifierError::ResolutionError(err.to_string())),
+            }
+        };
+
+        let document = doc_opt
+            .and_then(|mut doc_opt| {
+                if let Some(id) = doc_opt.get_mut("@context") {
+                    match id {
+                        serde_json::Value::String(id) => {
+                            *id = String::from("https://www.w3.org/ns/did/v1");
+                            Some(
+                                serde_json::from_value(doc_opt)
+                                    .map_err(|err| DecentralizedIdentifierError::ResolutionError(err.to_string())),
+                            )
+                        }
+                        _ => None,
+                    }
+                }
+                else {
+                    None
+                }
+            })
+            .transpose()?;
+
+        // let (metadata, document, _) = DIDWeb.resolve(&self.did(), &ResolutionInputMetadata::default()).await;
 
         if let Some(error) = metadata.error {
             Err(DecentralizedIdentifierError::ResolutionError(error))
@@ -162,8 +196,3 @@ impl<'a> DecentralizedIdentifier<'a> {
         }
     }
 }
-
-// pub struct PublicKey {
-//     pub x: Base64urlUInt,
-//     pub y: Base64urlUInt,
-// }
