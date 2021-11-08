@@ -1,10 +1,9 @@
 # NZCP Rust &emsp; [![Latest Version]][crates.io] [![Documentation]][docs.rs]
-[Latest Version]: https://img.shields.io/crates/v/nzcp.svg
+
+[latest version]: https://img.shields.io/crates/v/nzcp.svg
 [crates.io]: https://crates.io/crates/nzcp
-[Documentation]: https://img.shields.io/docsrs/nzcp
-[docs.rs]: https://docs.rs/nzcp/1.0.0/nzcp/
-
-
+[documentation]: https://img.shields.io/docsrs/nzcp
+[docs.rs]: https://docs.rs/nzcp/1.0.1/nzcp/
 
 An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-spec) verification, New Zealand's proof of COVID-19 vaccination solution, written in Rust 🦀
 
@@ -13,9 +12,10 @@ An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-
 Usage is very straight forward, simply call `verify_pass_uri` with the scanned QR Code URI. If the given pass is valid the function will return `Ok` with the pass details, otherwise it will return `Err` with details of the verification issue.
 
 Add the dependency to your `Cargo.toml`:
+
 ```toml
 [dependencies]
-nzcp = "1.0.0"
+nzcp = "1.0.1"
 ```
 
 ```rust
