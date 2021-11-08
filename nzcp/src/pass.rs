@@ -19,7 +19,9 @@ pub trait Pass: DeserializeOwned {
 const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier<'static> =
     DecentralizedIdentifier::Web("nzcp.identity.health.nz");
 
-/// Verify a pass barcode, returning the pass if verified or failing if not.
+/// Verify a pass barcode URI (from a scanned QR code), returning the pass if verified or failing if not.
+///
+/// A valid URI starts with `NZCP:/1/` followed by a base 32 string.
 ///
 /// Trusts only the MoH `nzcp.identity.health.nz` issuer.
 pub async fn verify_pass_uri<P: Pass>(uri: &str) -> Result<P, NzcpError> {
