@@ -1,7 +1,12 @@
 [package]
+description = "An implementation of NZ COVID verification, New Zealand's proof of COVID-19 vaccination solution"
 edition = "2021"
+keywords = ["nzcp", "covid", "vaccination", "vaccine", "verification"]
+license = "MIT"
 name = "nzcp"
-version = "0.1.0"
+readme = "README.md"
+repository = "https://github.com/vaxxnz/nzcp-rust"
+version = "1.0.0"
 
 [dependencies]
 base32 = "0.4.0"
