@@ -30,7 +30,7 @@ struct DecentralizedIdentifierVisitor;
 impl<'de> Visitor<'de> for DecentralizedIdentifierVisitor {
     type Value = DecentralizedIdentifier<'de>;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
             .write_str("a Decentralized Identifier who’s DID Method MUST correspond to web (starting with 'did:web:')")
     }

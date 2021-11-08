@@ -48,7 +48,7 @@ where
 {
     type Value = CwtPayload<'de, T>;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("COSE protected headers")
     }
 
@@ -150,7 +150,7 @@ mod tests {
 
         let value: serde_cbor::Value = serde_cbor::from_slice(&bytes).unwrap();
         dbg!(value);
-        let payload: CwtPayload<&'_ str> = serde_cbor::from_slice(&bytes).unwrap();
+        let payload: CwtPayload<'_, &'_ str> = serde_cbor::from_slice(&bytes).unwrap();
 
         assert_eq!(
             payload,
