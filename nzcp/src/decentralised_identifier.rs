@@ -15,6 +15,7 @@ use thiserror::Error;
 
 const DID_WEB: &'static str = "did:web:";
 
+#[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DecentralizedIdentifier<'a> {
     Web(&'a str),
