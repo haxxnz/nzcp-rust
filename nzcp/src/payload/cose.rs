@@ -26,12 +26,12 @@ impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
     pub async fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
         // TODO: caching
-        let public_key = self
+        let verifying_key = self
             .cwt_payload
             .issuer
-            .resolve_public_key(self.protected_headers.kid)
+            .resolve_verifying_key(self.protected_headers.kid)
             .await?;
-        self.verify_signature(&public_key)?;
+        self.verify_signature(&verifying_key)?;
 
         Ok(self.cwt_payload)
     }

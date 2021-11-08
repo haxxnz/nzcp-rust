@@ -1,6 +1,7 @@
 use std::{fmt, str::FromStr};
 
 use did_web::DIDWeb;
+use p256::{ecdsa::VerifyingKey, elliptic_curve::generic_array::GenericArray, EncodedPoint};
 use serde::{
     de::{self, Visitor},
     Deserialize, Deserializer,
@@ -8,7 +9,7 @@ use serde::{
 use ssi::{
     did::{Document, VerificationMethod, DIDURL},
     did_resolve::{DIDResolver, ResolutionInputMetadata},
-    jwk::{self, Base64urlUInt},
+    jwk,
 };
 use thiserror::Error;
 const DID_WEB: &'static str = "did:web:";
@@ -82,6 +83,8 @@ pub enum DecentralizedIdentifierError {
     JWKMissingY,
     #[error("publicKeyJwk 'crv' was not 'P-256'")]
     JWKWrongCurve,
+    #[error("publicKeyJwk was invalid")]
+    InvalidJWK,
 }
 
 impl<'a> DecentralizedIdentifier<'a> {
@@ -105,7 +108,7 @@ impl<'a> DecentralizedIdentifier<'a> {
         }
     }
 
-    pub async fn resolve_public_key(&self, kid: &str) -> Result<PublicKey, DecentralizedIdentifierError> {
+    pub async fn resolve_verifying_key(&self, kid: &str) -> Result<VerifyingKey, DecentralizedIdentifierError> {
         let document = self.resolve_document().await?;
 
         let absolute_key = format!("{}#{}", self.did(), kid);
@@ -144,7 +147,14 @@ impl<'a> DecentralizedIdentifier<'a> {
             let x = ec.x_coordinate.ok_or(JWKMissingX)?;
             let y = ec.y_coordinate.ok_or(JWKMissingY)?;
 
-            Ok(PublicKey { x, y })
+            let point = EncodedPoint::from_affine_coordinates(
+                &GenericArray::from_slice(&x.0),
+                &GenericArray::from_slice(&y.0),
+                false,
+            );
+            let verifying_key = VerifyingKey::from_encoded_point(&point).map_err(|_| InvalidJWK)?;
+
+            Ok(verifying_key)
         }
         else {
             Err(MissingJWK)
@@ -152,7 +162,7 @@ impl<'a> DecentralizedIdentifier<'a> {
     }
 }
 
-pub struct PublicKey {
-    pub x: Base64urlUInt,
-    pub y: Base64urlUInt,
-}
+// pub struct PublicKey {
+//     pub x: Base64urlUInt,
+//     pub y: Base64urlUInt,
+// }
