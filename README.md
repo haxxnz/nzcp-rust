@@ -1,6 +1,10 @@
-# NZCP Rust &emsp; [![Latest Version]][crates.io]
+# NZCP Rust &emsp; [![Latest Version]][crates.io] [![Documentation]][docs.rs]
 [Latest Version]: https://img.shields.io/crates/v/nzcp.svg
 [crates.io]: https://crates.io/crates/nzcp
+[Documentation]: https://img.shields.io/docsrs/nzcp
+[docs.rs]: https://docs.rs/nzcp/1.0.0/nzcp/
+
+
 
 An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-spec) verification, New Zealand's proof of COVID-19 vaccination solution, written in Rust 🦀
 
