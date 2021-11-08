@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 
-use super::{CwtPayload, DecentralizedIdentifier};
+use super::{CwtClaims, DecentralizedIdentifier};
 use crate::payload::cose::signature::verify::CoseVerificationError;
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -12,7 +12,7 @@ pub enum CwtValidationError {
     Expired(DateTime<Utc>),
 }
 
-impl<'a, T> CwtPayload<'a, T> {
+impl<'a, T> CwtClaims<'a, T> {
     /// Get the issuer of the payload, failing if it is not trusted.
     pub fn verify_issuer(
         &self,
@@ -28,6 +28,8 @@ impl<'a, T> CwtPayload<'a, T> {
 
     pub fn validate(&self) -> Result<(), CwtValidationError> {
         use CwtValidationError::*;
+
+        // TODO: verify credential version >= 1.0.0
 
         // issuer would already have been verified here
         let now = Utc::now();

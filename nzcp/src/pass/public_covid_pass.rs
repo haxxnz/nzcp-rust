@@ -51,9 +51,9 @@ mod tests {
             "dob": "1979-04-14"
         }"#;
 
-        let payload: PublicCovidPass = serde_json::from_str(json).unwrap();
+        let pass: PublicCovidPass = serde_json::from_str(json).unwrap();
         assert_eq!(
-            payload,
+            pass,
             PublicCovidPass {
                 given_name: String::from("John Andrew"),
                 family_name: Some(String::from("Doe")),

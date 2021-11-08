@@ -19,7 +19,7 @@ pub enum NzcpError {
     /// The signature of the COSE payload was invalid, or the issuer was not trusted.
     #[error("Invalid signature: {0:?}")]
     InvalidSignature(#[from] CoseVerificationError),
-    /// The CWT payload was not valid.
+    /// The CWT claims were not valid.
     #[error("Invalid CWT: {0:?}")]
     InvalidCWT(#[from] CwtValidationError),
 }

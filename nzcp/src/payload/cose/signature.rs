@@ -8,7 +8,7 @@ pub struct CoseSignature<'a> {
     pub bytes: &'a [u8],
     pub sign_structure: CoseSignStructure,
     pub protected_headers_raw: &'a [u8],
-    pub cwt_payload_raw: &'a [u8],
+    pub cwt_claims_raw: &'a [u8],
 }
 
 const SIGN1_TAG: u64 = 18;

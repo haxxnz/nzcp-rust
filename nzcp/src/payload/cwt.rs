@@ -20,7 +20,7 @@ const VERIFIABLE_CREDENTIAL_KEY: &'static str = "vc";
 const EXPECTED_KEYS: [&'static str; 5] = ["7 (cwt)", "1 (iss)", "5 (nbf)", "4 (exp)", "vc"];
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct CwtPayload<'a, T> {
+pub struct CwtClaims<'a, T> {
     cwt_token_id: Uuid,
     issuer: DecentralizedIdentifier<'a>,
     not_before: DateTime<Utc>,
@@ -28,7 +28,7 @@ pub struct CwtPayload<'a, T> {
     verifiable_credential: VerifiableCredential<'a, T>,
 }
 
-impl<'a, T> CwtPayload<'a, T> {
+impl<'a, T> CwtClaims<'a, T> {
     pub fn validated_credential_subject(self) -> Result<T, CwtValidationError> {
         self.validate()?;
         Ok(self.verifiable_credential.credential_subject)
@@ -39,14 +39,14 @@ fn utc_from_timestamp(epoch_seconds: i64) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(epoch_seconds, 0), Utc)
 }
 
-/// CWT payload contains integer keys, so we need to manually deserialize.
-struct CwtPayloadVisitor<T>(PhantomData<fn() -> T>);
+/// CWT claims contain integer keys, so we need to manually deserialize.
+struct CwtClaimsVisitor<T>(PhantomData<fn() -> T>);
 
-impl<'de, T> Visitor<'de> for CwtPayloadVisitor<T>
+impl<'de, T> Visitor<'de> for CwtClaimsVisitor<T>
 where
     T: Deserialize<'de>,
 {
-    type Value = CwtPayload<'de, T>;
+    type Value = CwtClaims<'de, T>;
 
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("COSE protected headers")
@@ -83,7 +83,7 @@ where
 
         match (cwt_token_id, issuer, not_before, expiry, verifiable_credential) {
             (Some(cwt_token_id), Some(issuer), Some(not_before), Some(expiry), Some(verifiable_credential)) => {
-                Ok(CwtPayload {
+                Ok(CwtClaims {
                     cwt_token_id,
                     issuer,
                     not_before,
@@ -100,7 +100,7 @@ where
     }
 }
 
-impl<'de: 'a, 'a, T> Deserialize<'de> for CwtPayload<'a, T>
+impl<'de: 'a, 'a, T> Deserialize<'de> for CwtClaims<'a, T>
 where
     T: Deserialize<'de>,
 {
@@ -108,7 +108,7 @@ where
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_map(CwtPayloadVisitor::<T>(PhantomData))
+        deserializer.deserialize_map(CwtClaimsVisitor::<T>(PhantomData))
     }
 }
 
@@ -150,11 +150,11 @@ mod tests {
 
         let value: serde_cbor::Value = serde_cbor::from_slice(&bytes).unwrap();
         dbg!(value);
-        let payload: CwtPayload<'_, &'_ str> = serde_cbor::from_slice(&bytes).unwrap();
+        let claims: CwtClaims<'_, &'_ str> = serde_cbor::from_slice(&bytes).unwrap();
 
         assert_eq!(
-            payload,
-            CwtPayload {
+            claims,
+            CwtClaims {
                 cwt_token_id: Uuid::parse_str("urn:uuid:60a4f54d-4e30-4332-be33-ad78b1eafa4b").unwrap(),
                 issuer: DecentralizedIdentifier::Web("nzcp.covid19.health.nz"),
                 not_before: utc_from_timestamp(1635883530),

@@ -12,6 +12,7 @@ use ssi::{
     jwk,
 };
 use thiserror::Error;
+
 const DID_WEB: &'static str = "did:web:";
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

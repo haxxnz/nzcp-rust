@@ -10,7 +10,7 @@ use self::{
     protected_headers::ProtectedHeaders,
     signature::{verify::CoseVerificationError, CoseSignStructure, CoseSignature},
 };
-use super::cwt::CwtPayload;
+use super::cwt::CwtClaims;
 use crate::decentralised_identifier::DecentralizedIdentifier;
 
 mod protected_headers;
@@ -19,26 +19,26 @@ pub mod signature;
 #[derive(Debug)]
 pub struct CoseStructure<'a, T> {
     protected_headers: ProtectedHeaders<'a>,
-    cwt_payload: CwtPayload<'a, T>,
+    cwt_claims: CwtClaims<'a, T>,
     signature: CoseSignature<'a>,
 }
 
 impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
-    pub async fn verified_payload(
+    pub async fn verified_claims(
         self,
         trusted_issuer: DecentralizedIdentifier<'_>,
-    ) -> Result<CwtPayload<'a, T>, CoseVerificationError> {
+    ) -> Result<CwtClaims<'a, T>, CoseVerificationError> {
         // TODO: caching
         let verifying_key = self
-            .cwt_payload
+            .cwt_claims
             .verify_issuer(trusted_issuer)?
             .resolve_verifying_key(self.protected_headers.kid)
             .await?;
 
         self.verify_signature(&verifying_key)?;
 
-        Ok(self.cwt_payload)
+        Ok(self.cwt_claims)
     }
 }
 
@@ -53,20 +53,20 @@ where
         let tagged: Tagged<CoseStructureSections<'_, T>> = Deserialize::deserialize(deserializer)?;
         let CoseStructureSections {
             protected_headers_raw,
-            cwt_payload_raw,
+            cwt_claims_raw,
             protected_headers,
-            cwt_payload,
+            cwt_claims,
             signature,
         } = tagged.value;
 
         Ok(CoseStructure {
             protected_headers,
-            cwt_payload,
+            cwt_claims,
             signature: CoseSignature {
                 bytes: signature,
                 sign_structure: CoseSignStructure::try_from(tagged.tag).map_err(D::Error::custom)?,
                 protected_headers_raw,
-                cwt_payload_raw,
+                cwt_claims_raw,
             },
         })
     }
@@ -77,9 +77,9 @@ where
 #[derive(Debug)]
 struct CoseStructureSections<'a, T> {
     protected_headers_raw: &'a [u8],
-    cwt_payload_raw: &'a [u8],
+    cwt_claims_raw: &'a [u8],
     protected_headers: ProtectedHeaders<'a>,
-    cwt_payload: CwtPayload<'a, T>,
+    cwt_claims: CwtClaims<'a, T>,
     signature: &'a [u8],
 }
 
@@ -118,17 +118,17 @@ where
         // unprotected headers are empty in spec, just skip them
         let _: IgnoredAny = seq
             .next_element()?
-            .ok_or_else(|| A::Error::custom("missing COSE segment: unprotected headers"))?;
+            .ok_or_else(|| A::Error::custom("malformed COSE data (missing unprotected headers)"))?;
 
-        let cwt_payload_raw = bytes("CWT payload", &mut seq)?;
-        let cwt_payload = serde_cbor::from_slice(cwt_payload_raw).map_err(A::Error::custom)?;
+        let cwt_claims_raw = bytes("CWT claims", &mut seq)?;
+        let cwt_claims = serde_cbor::from_slice(cwt_claims_raw).map_err(A::Error::custom)?;
         let signature = bytes("signature", &mut seq)?;
 
         Ok(CoseStructureSections {
             protected_headers,
             protected_headers_raw,
-            cwt_payload,
-            cwt_payload_raw,
+            cwt_claims,
+            cwt_claims_raw,
             signature,
         })
     }

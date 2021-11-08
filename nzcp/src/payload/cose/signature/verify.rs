@@ -46,6 +46,7 @@ impl<'a, T> CoseStructure<'a, T> {
 #[derive(Serialize, Debug)]
 struct SignatureStructure<'a>(
     &'static str,
+    // TODO: comment what each of these are
     #[serde(with = "serde_bytes")] &'a [u8],
     #[serde(with = "serde_bytes")] &'static [u8],
     #[serde(with = "serde_bytes")] &'a [u8],
@@ -55,7 +56,7 @@ impl<'a> CoseSignature<'a> {
     fn sig_structure(&self) -> SignatureStructure<'a> {
         match self.sign_structure {
             CoseSignStructure::Sign1 => {
-                SignatureStructure("Signature1", self.protected_headers_raw, &[], self.cwt_payload_raw)
+                SignatureStructure("Signature1", self.protected_headers_raw, &[], self.cwt_claims_raw)
             }
         }
     }
