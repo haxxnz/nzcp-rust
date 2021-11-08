@@ -1,4 +1,4 @@
-# NZCP
+# NZCP Rust
 
 An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-spec) verification, New Zealand's proof of COVID-19 vaccination solution, written in Rust 🦀
 
