@@ -7,14 +7,19 @@ pub use crate::{
     },
 };
 
+/// An error that occurred while verifying a pass barcode.
 #[derive(Debug, Error)]
 pub enum NzcpError {
+    /// The barcode string was invalid.
     #[error("Invalid QR barcode: {0:?}")]
     QrBarcode(#[from] QrBarcodeError),
+    /// The payload could not be deserialized correctly.
     #[error("Invalid payload: {0:?}")]
     InvalidPayload(#[from] serde_cbor::Error),
+    /// The signature of the COSE payload was invalid, or the issuer was not trusted.
     #[error("Invalid signature: {0:?}")]
     InvalidSignature(#[from] CoseVerificationError),
+    /// The CWT payload was not valid.
     #[error("Invalid CWT: {0:?}")]
     InvalidCWT(#[from] CwtValidationError),
 }

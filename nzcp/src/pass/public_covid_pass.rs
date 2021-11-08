@@ -10,6 +10,7 @@ pub enum PublicCovidPassError {
     InvalidDateOfBirth,
 }
 
+/// See: https://nzcp.covid19.health.nz/#publiccovidpass
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct PublicCovidPass {
     /// Given name(s) of the subject of the pass.
@@ -20,6 +21,7 @@ pub struct PublicCovidPass {
     #[serde(rename = "familyName")]
     pub family_name: Option<String>,
 
+    /// Date of birth of the subject of the pass.
     #[serde(rename = "dob", deserialize_with = "deserialize_iso_8601_date")]
     pub date_of_birth: NaiveDate,
 }

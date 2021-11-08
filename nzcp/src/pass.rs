@@ -6,16 +6,27 @@ use crate::{
     payload::{barcode::QrBarcode, cose::CoseStructure},
 };
 
-pub mod public_covid_pass;
+pub(crate) mod public_covid_pass;
 
 pub trait Pass: DeserializeOwned {
     /// The type ID of the pass, given in `vc.type[1]`. (e.g. 'PublicCovidPass')
     const CREDENTIAL_TYPE: &'static str;
 }
 
+const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier<'static> =
+    DecentralizedIdentifier::Web("nzcp.identity.health.nz");
+
+/// Verify a pass barcode, returning the pass if verified or failing if not.
+///
+/// Trusts only the MoH `nzcp.identity.health.nz` issuer.
+pub async fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
+    verify_pass_barcode_with_trusted_issuer(barcode_str, MINISTRY_OF_HEALTH_ISSUER).await
+}
+
 /// Verify a pass barcode, returning the pass if verified or failing if not.
 ///
 /// Trusts only the provided issuer (should only be used for tests where the identifier is different).
+#[doc(hidden)]
 pub async fn verify_pass_barcode_with_trusted_issuer<P: Pass>(
     barcode_str: &str,
     trusted_issuer: DecentralizedIdentifier<'_>,
@@ -33,14 +44,4 @@ pub async fn verify_pass_barcode_with_trusted_issuer<P: Pass>(
     let pass = cwt.validated_credential_subject()?;
 
     Ok(pass)
-}
-
-const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier<'static> =
-    DecentralizedIdentifier::Web("nzcp.identity.health.nz");
-
-/// Verify a pass barcode, returning the pass if verified or failing if not.
-///
-/// Trusts only the MoH `nzcp.identity.health.nz` issuer.
-pub async fn verify_pass_barcode<P: Pass>(barcode_str: &str) -> Result<P, NzcpError> {
-    verify_pass_barcode_with_trusted_issuer(barcode_str, MINISTRY_OF_HEALTH_ISSUER).await
 }
