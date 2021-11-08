@@ -14,7 +14,7 @@ use ssi::{
 use thiserror::Error;
 const DID_WEB: &'static str = "did:web:";
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DecentralizedIdentifier<'a> {
     Web(&'a str),
 }

@@ -2,12 +2,7 @@ use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 use super::{CwtPayload, DecentralizedIdentifier};
-
-/// Spec examples use a different issuer to production.
-#[cfg(test)]
-const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier = DecentralizedIdentifier::Web("nzcp.covid19.health.nz");
-#[cfg(not(test))]
-const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier = DecentralizedIdentifier::Web("nzcp.identity.health.nz");
+use crate::payload::cose::signature::verify::CoseVerificationError;
 
 #[derive(Debug, Error)]
 pub enum CwtValidationError {
@@ -15,23 +10,32 @@ pub enum CwtValidationError {
     NotYetActive(DateTime<Utc>),
     #[error("token has expired (expired: {0:?})")]
     Expired(DateTime<Utc>),
-    #[error("provided issuer is not trusted: {0}")]
-    UntrustedIssuer(String),
 }
 
 impl<'a, T> CwtPayload<'a, T> {
+    /// Get the issuer of the payload, failing if it is not trusted.
+    pub fn verify_issuer(
+        &self,
+        trusted_issuer: DecentralizedIdentifier<'_>,
+    ) -> Result<DecentralizedIdentifier<'_>, CoseVerificationError> {
+        if self.issuer != trusted_issuer {
+            Err(CoseVerificationError::UntrustedIssuer(self.issuer.to_string()))
+        }
+        else {
+            Ok(self.issuer)
+        }
+    }
+
     pub fn validate(&self) -> Result<(), CwtValidationError> {
         use CwtValidationError::*;
 
+        // issuer would already have been verified here
         let now = Utc::now();
-        if self.not_before < now {
+        if now < self.not_before {
             Err(NotYetActive(self.not_before))
         }
-        else if now <= self.expiry {
+        else if self.expiry <= now {
             Err(Expired(self.expiry))
-        }
-        else if self.issuer != MINISTRY_OF_HEALTH_ISSUER {
-            Err(UntrustedIssuer(self.issuer.to_string()))
         }
         else {
             Ok(())

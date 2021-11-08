@@ -7,20 +7,27 @@ use serde::Serialize;
 use thiserror::Error;
 
 use super::{CoseSignStructure, CoseSignature};
-use crate::{decentralised_identifier::DecentralizedIdentifierError, payload::cose::CoseStructure};
+use crate::{
+    decentralised_identifier::DecentralizedIdentifierError,
+    payload::{cose::CoseStructure, cwt::validation::CwtValidationError},
+};
 
 /// A deliberately opaque signature error
 #[derive(Debug, Error)]
-pub enum CoseSignatureError {
+pub enum CoseVerificationError {
     #[error("signature verification failed")]
     VerificationFailed,
+    #[error("CWT validation failed: {0:?}")]
+    CwtValidation(#[from] CwtValidationError),
+    #[error("provided issuer is not trusted: {0}")]
+    UntrustedIssuer(String),
     #[error("DID resolution failed: {0:?}")]
     DecentralizedIdentifierResolution(#[from] DecentralizedIdentifierError),
 }
 
 impl<'a, T> CoseStructure<'a, T> {
-    pub fn verify_signature(&self, verifying_key: &VerifyingKey) -> Result<(), CoseSignatureError> {
-        use CoseSignatureError::VerificationFailed;
+    pub fn verify_signature(&self, verifying_key: &VerifyingKey) -> Result<(), CoseVerificationError> {
+        use CoseVerificationError::VerificationFailed;
 
         let sig_structure = self.signature.sig_structure();
         let to_be_signed = serde_cbor::to_vec(&sig_structure).map_err(|_| VerificationFailed)?;

@@ -8,9 +8,10 @@ use serde_cbor::tags::Tagged;
 
 use self::{
     protected_headers::ProtectedHeaders,
-    signature::{verify::CoseSignatureError, CoseSignStructure, CoseSignature},
+    signature::{verify::CoseVerificationError, CoseSignStructure, CoseSignature},
 };
 use super::cwt::CwtPayload;
+use crate::decentralised_identifier::DecentralizedIdentifier;
 
 mod protected_headers;
 pub mod signature;
@@ -24,11 +25,14 @@ pub struct CoseStructure<'a, T> {
 
 impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
-    pub async fn verified_payload(self) -> Result<CwtPayload<'a, T>, CoseSignatureError> {
+    pub async fn verified_payload(
+        self,
+        trusted_issuer: DecentralizedIdentifier<'_>,
+    ) -> Result<CwtPayload<'a, T>, CoseVerificationError> {
         // TODO: caching
         let verifying_key = self
             .cwt_payload
-            .issuer
+            .verify_issuer(trusted_issuer)?
             .resolve_verifying_key(self.protected_headers.kid)
             .await?;
         self.verify_signature(&verifying_key)?;
@@ -86,7 +90,7 @@ where
 {
     type Value = CoseStructureSections<'de, T>;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("COSE structure")
     }
 

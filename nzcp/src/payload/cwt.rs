@@ -22,7 +22,7 @@ const EXPECTED_KEYS: [&'static str; 5] = ["7 (cwt)", "1 (iss)", "5 (nbf)", "4 (e
 #[derive(Debug, PartialEq, Eq)]
 pub struct CwtPayload<'a, T> {
     cwt_token_id: Uuid,
-    pub issuer: DecentralizedIdentifier<'a>,
+    issuer: DecentralizedIdentifier<'a>,
     not_before: DateTime<Utc>,
     expiry: DateTime<Utc>,
     verifiable_credential: VerifiableCredential<'a, T>,
