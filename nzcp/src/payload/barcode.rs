@@ -3,7 +3,7 @@ use std::str::FromStr;
 use base32::Alphabet::RFC4648;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum QrBarcodeError {
     #[error("The payload of the QR Code MUST be base32 encoded")]
     InvalidBase32,

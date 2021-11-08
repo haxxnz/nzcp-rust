@@ -13,7 +13,7 @@ use crate::{
 };
 
 /// A deliberately opaque signature error
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CoseVerificationError {
     #[error("signature verification failed")]
     VerificationFailed,

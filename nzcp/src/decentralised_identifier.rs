@@ -57,7 +57,7 @@ impl<'de: 'a, 'a> Deserialize<'de> for DecentralizedIdentifier<'a> {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum DecentralizedIdentifierError {
     #[error("DID resolution error: {0}")]
     ResolutionError(String),

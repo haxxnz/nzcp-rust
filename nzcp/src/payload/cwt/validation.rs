@@ -4,7 +4,7 @@ use thiserror::Error;
 use super::{CwtPayload, DecentralizedIdentifier};
 use crate::payload::cose::signature::verify::CoseVerificationError;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CwtValidationError {
     #[error("token not yet valid as the 'not before date' is in the future (not before: {0:?})")]
     NotYetActive(DateTime<Utc>),
