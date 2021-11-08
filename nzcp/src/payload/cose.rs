@@ -36,23 +36,6 @@ impl<'a, T> CoseStructure<'a, T> {
             .resolve_verifying_key(self.protected_headers.kid)
             .await?;
 
-
-        let point = p256::EncodedPoint::from_affine_coordinates(
-            &p256::elliptic_curve::generic_array::GenericArray::from_slice(
-                &ssi::jwk::Base64urlUInt::try_from(String::from("zRR-XGsCp12Vvbgui4DD6O6cqmhfPuXMhi1OxPl8760"))
-                    .unwrap()
-                    .0,
-            ),
-            &p256::elliptic_curve::generic_array::GenericArray::from_slice(
-                &ssi::jwk::Base64urlUInt::try_from(String::from("Iv5SU6FuW-TRYh5_GOrJlcV_gpF_GpFQhCOD8LSk3T0"))
-                    .unwrap()
-                    .0,
-            ),
-            false,
-        );
-        let verifying_key = p256::ecdsa::VerifyingKey::from_encoded_point(&point).unwrap();
-
-
         self.verify_signature(&verifying_key)?;
 
         Ok(self.cwt_payload)
