@@ -117,7 +117,7 @@ struct VerifiableCredential<'a, T> {
     /// JSON-LD Context property for conformance to the W3C VC standard. This property MUST be present and its value MUST be an array of strings where the first value MUST equal https://www.w3.org/2018/credentials/v1.
     ///
     /// The following is an example including an additional JSON-LD context entry that defines the additional vocabulary specific to the New Zealand COVID Pass.
-    /// ```
+    /// ```notrust
     /// ["https://www.w3.org/2018/credentials/v1", "https://nzcp.covid19.health.nz/contexts/v1"]
     /// ```
     #[serde(rename = "@context")]
@@ -126,7 +126,7 @@ struct VerifiableCredential<'a, T> {
     /// Type property for conformance to the W3C VC standard. This property MUST be present and its value MUST be an array of two string values, whose first element is VerifiableCredential and second element corresponds to one defined in the pass types section.
     ///
     /// Example
-    /// ```
+    /// ```notrust
     /// ["VerifiableCredential", "PublicCovidPass"]
     /// ```
     #[serde(rename = "type")]

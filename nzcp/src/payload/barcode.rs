@@ -20,8 +20,8 @@ pub enum QrBarcodeError {
 ///
 /// Implements `FromStr`, so use as follows:
 ///
-/// ```rust
-/// let barcode: QrBarcode = "NZCP:/1/2KCEVIQ...".parse().unwrap();
+/// ```ignore
+/// let barcode: QrBarcode = "NZCP:/1/2KCEVIQ...".parse().unwrap;
 /// ```
 pub struct QrBarcode(pub Vec<u8>);
 
