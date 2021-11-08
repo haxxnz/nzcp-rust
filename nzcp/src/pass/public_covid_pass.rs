@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use serde::{de::Error, Deserialize, Deserializer};
+use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
 use thiserror::Error;
 
 use super::Pass;
@@ -11,7 +11,7 @@ pub enum PublicCovidPassError {
 }
 
 /// See: https://nzcp.covid19.health.nz/#publiccovidpass
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PublicCovidPass {
     /// Given name(s) of the subject of the pass.
     #[serde(rename = "givenName")]
@@ -22,7 +22,11 @@ pub struct PublicCovidPass {
     pub family_name: Option<String>,
 
     /// Date of birth of the subject of the pass.
-    #[serde(rename = "dob", deserialize_with = "deserialize_iso_8601_date")]
+    #[serde(
+        rename = "dob",
+        serialize_with = "serialize_iso_8601_date",
+        deserialize_with = "deserialize_iso_8601_date"
+    )]
     pub date_of_birth: NaiveDate,
 }
 
@@ -41,12 +45,19 @@ where
         .map_err(|_| D::Error::custom(PublicCovidPassError::InvalidDateOfBirth))
 }
 
+fn serialize_iso_8601_date<S>(date: &NaiveDate, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    date.format("%Y-%m-%d").to_string().serialize(serializer)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn deserialize_json() {
+    fn serialize_deserialize_json() {
         let json = r#"{
             "givenName": "John Andrew",
             "familyName": "Doe",
@@ -61,6 +72,10 @@ mod tests {
                 family_name: Some(String::from("Doe")),
                 date_of_birth: NaiveDate::from_ymd(1979, 04, 14),
             }
-        )
+        );
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(json).unwrap(),
+            serde_json::to_value(&pass).unwrap()
+        );
     }
 }
