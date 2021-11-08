@@ -27,12 +27,12 @@ impl<'a, T> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
     pub async fn verified_claims(
         self,
-        trusted_issuer: DecentralizedIdentifier<'_>,
+        trusted_issuers: &[DecentralizedIdentifier<'_>],
     ) -> Result<CwtClaims<'a, T>, CoseVerificationError> {
         // TODO: caching
         let verifying_key = self
             .cwt_claims
-            .verify_issuer(trusted_issuer)?
+            .verify_issuer(trusted_issuers)?
             .resolve_verifying_key(self.protected_headers.kid)
             .await?;
 

@@ -16,9 +16,9 @@ impl<'a, T> CwtClaims<'a, T> {
     /// Get the issuer of the payload, failing if it is not trusted.
     pub fn verify_issuer(
         &self,
-        trusted_issuer: DecentralizedIdentifier<'_>,
+        trusted_issuers: &[DecentralizedIdentifier<'_>],
     ) -> Result<DecentralizedIdentifier<'_>, CoseVerificationError> {
-        if self.issuer != trusted_issuer {
+        if !trusted_issuers.contains(&self.issuer) {
             Err(CoseVerificationError::UntrustedIssuer(self.issuer.to_string()))
         }
         else {
