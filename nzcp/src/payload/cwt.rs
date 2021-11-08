@@ -8,7 +8,7 @@ use serde::{
 use uuid::Uuid;
 
 use self::validation::CwtValidationError;
-use crate::decentralised_identifier::DecentralizedIdentifier;
+use crate::{decentralised_identifier::DecentralizedIdentifier, pass::Pass};
 
 pub mod validation;
 
@@ -28,7 +28,7 @@ pub struct CwtClaims<'a, T> {
     verifiable_credential: VerifiableCredential<'a, T>,
 }
 
-impl<'a, T> CwtClaims<'a, T> {
+impl<'a, T: Pass> CwtClaims<'a, T> {
     pub fn validated_credential_subject(self) -> Result<T, CwtValidationError> {
         self.validate()?;
         Ok(self.verifiable_credential.credential_subject)

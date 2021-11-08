@@ -11,6 +11,9 @@ pub(crate) mod public_covid_pass;
 pub trait Pass: DeserializeOwned {
     /// The type ID of the pass, given in `vc.type[1]`. (e.g. 'PublicCovidPass')
     const CREDENTIAL_TYPE: &'static str;
+
+    /// The JSON-LD context URL (e.g. `https://nzcp.covid19.health.nz/contexts/v1`)
+    const CONTEXT_URL: &'static str;
 }
 
 const MINISTRY_OF_HEALTH_ISSUER: DecentralizedIdentifier<'static> =

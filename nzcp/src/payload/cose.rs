@@ -11,7 +11,7 @@ use self::{
     signature::{verify::CoseVerificationError, CoseSignStructure, CoseSignature},
 };
 use super::cwt::CwtClaims;
-use crate::decentralised_identifier::DecentralizedIdentifier;
+use crate::{decentralised_identifier::DecentralizedIdentifier, pass::Pass};
 
 mod protected_headers;
 pub mod signature;
@@ -23,7 +23,7 @@ pub struct CoseStructure<'a, T> {
     signature: CoseSignature<'a>,
 }
 
-impl<'a, T> CoseStructure<'a, T> {
+impl<'a, T: Pass> CoseStructure<'a, T> {
     /// Get the CWT payload iff the signature is valid.
     pub async fn verified_claims(
         self,

@@ -28,6 +28,8 @@ pub struct PublicCovidPass {
 
 impl Pass for PublicCovidPass {
     const CREDENTIAL_TYPE: &'static str = "PublicCovidPass";
+
+    const CONTEXT_URL: &'static str = "https://nzcp.covid19.health.nz/contexts/v1";
 }
 
 fn deserialize_iso_8601_date<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
