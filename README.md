@@ -38,3 +38,9 @@ The library is written in a manner which allows easy addition to the types of pa
 ## Usage Outside of Rust
 
 There are plans to provide cross platform libraries using this implementation for other languages, such as web browser WASM and React Native. If you'd like to create your own please do!
+
+## Support
+
+See something that can be improved? [Report an Issue](https://github.com/vaxxnz/nzcp-rust/issues) or contact us to [report a security concern](mailto:info@vaxx.nz).
+
+Want to help us build a better library? We welcome contributions via [pull requests](https://github.com/vaxxnz/nzcp-rust/pulls) and welcome you to our wider [Vaxx.nz](https://vaxx.nz) community on Discord: [Join our Discord community](https://discord.gg/sJWmNy7wnM).
