@@ -7,6 +7,8 @@
 
 An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-spec) verification, New Zealand's proof of COVID-19 vaccination solution, written in Rust 🦀
 
+We also have a [JavaScript implementation](https://github.com/vaxxnz/nzcp-js/) available.
+
 ## Usage
 
 Usage is very straight forward, simply call `verify_pass_uri` with the scanned QR Code URI. If the given pass is valid the function will return `Ok` with the pass details, otherwise it will return `Err` with details of the verification issue.
