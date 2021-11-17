@@ -115,19 +115,24 @@ impl<'a> DecentralizedIdentifier<'a> {
             .and_then(|mut doc_opt| {
                 if let Some(id) = doc_opt.get_mut("@context") {
                     match id {
-                        serde_json::Value::String(id) => {
+                        serde_json::Value::String(id) if id == "https://w3.org/ns/did/v1" => {
                             *id = String::from("https://www.w3.org/ns/did/v1");
-                            Some(
-                                serde_json::from_value(doc_opt)
-                                    .map_err(|err| DecentralizedIdentifierError::ResolutionError(err.to_string())),
-                            )
                         }
-                        _ => None,
+                        serde_json::Value::Array(arr)
+                            if arr.first().and_then(|v| v.as_str()) == Some("https://w3.org/ns/did/v1") =>
+                        {
+                            *arr.first_mut().unwrap() =
+                                serde_json::Value::String(String::from("https://www.w3.org/ns/did/v1"));
+                        }
+                        _ => (),
                     }
                 }
-                else {
-                    None
-                }
+
+                Some(doc_opt)
+            })
+            .map(|doc| {
+                serde_json::from_value(doc)
+                    .map_err(|err| DecentralizedIdentifierError::ResolutionError(err.to_string()))
             })
             .transpose()?;
 
