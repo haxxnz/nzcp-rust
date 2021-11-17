@@ -3,7 +3,7 @@
 [latest version]: https://img.shields.io/crates/v/nzcp.svg
 [crates.io]: https://crates.io/crates/nzcp
 [documentation]: https://img.shields.io/docsrs/nzcp
-[docs.rs]: https://docs.rs/nzcp/1.0.1/nzcp/
+[docs.rs]: https://docs.rs/nzcp/1.0.2/nzcp/
 
 An implementation of [NZ COVID Pass](https://github.com/minhealthnz/nzcovidpass-spec) verification, New Zealand's proof of COVID-19 vaccination solution, written in Rust 🦀
 
@@ -17,7 +17,7 @@ Add the dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-nzcp = "1.0.1"
+nzcp = "1.0.2"
 ```
 
 ```rust
